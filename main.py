@@ -13,13 +13,13 @@ def linkextraction(soup):
     return quote
 
 def tableextractor(soup):
-    table1 = soup.find('table')
+    table = soup.find('table')
     headers = []
-    for i in table1.find_all('th'):
+    for i in table.find_all('th'):
         title = i.text
         headers.append(title)
     mydata = pd.DataFrame(columns=headers)
-    for j in table1.find_all('tr')[1:]:
+    for j in table.find_all('tr')[1:]:
       row_data = j.find_all('td')
       row = [i.text for i in row_data]
       length = len(mydata)
@@ -46,18 +46,14 @@ if __name__ == '__main__':
             imgLinks.append(row.a['href'])
 
         for count, i in enumerate(imgLinks):
-            #print(i)
             url = 'https://www.ncei.noaa.gov/waf/okeanos-animal-guide/images/' + i.removesuffix('.html') + '.jpg'
-            url1 = 'https://www.ncei.noaa.gov/waf/okeanos-animal-guide/' + i
             r = requests.get(url)
-            i = requests.get(url1)
-            soup1 = BeautifulSoup(i.content, 'html5lib')
-
+            i = requests.get('https://www.ncei.noaa.gov/waf/okeanos-animal-guide/' + i)
+            soup = BeautifulSoup(i.content, 'html5lib')
             with open(dirs+'/'+str(count+1)+'.jpg', 'wb') as f:
                 f.write(r.content)
-            table = tableextractor(soup1)
-            with open('table.txt', 'w') as f:
-                for line in table:
-                    f.write(line)
-                    f.write('\n')
+            table = tableextractor(soup)
+            table.to_csv(dirs+'/'+str(count+1)+'.csv', index=False)
+            break
+        break
 
